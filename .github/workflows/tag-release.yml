@@ -1,0 +1,35 @@
+# Creates the release tag v<version> (the Version of the app's [AppManifest] class) on a commit of
+# main, or of beta for a beta version, then publishes it: run it from the Actions tab, or through
+# the GitHub API. The steps live in the reusable workflow kazoos-tag-release.yml of
+# Kazo-ca/Os-AppTemplate (ADR 0271 §7).
+name: Tag a release
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: Commit to tag (empty for the head of the branch)
+        required: false
+        default: ''
+      branch:
+        description: Branch of the commit
+        type: choice
+        options: [main, beta]
+        default: main
+      publish:
+        description: Run the publishing workflows on the tag
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    uses: ./.github/workflows/kazoos-tag-release.yml
+    with:
+      app-directory: src/Kazo.Os.App
+      commit: ${{ inputs.commit }}
+      branch: ${{ inputs.branch }}
+      publish: ${{ inputs.publish }}
+    secrets: inherit

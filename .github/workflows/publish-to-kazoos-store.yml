@@ -1,0 +1,22 @@
+# Submits a version of the app to the Kazo OS Store catalog for a tag v<version> (ADR 0188 §4, §7):
+# a stable version to its main branch, a beta version (1.2.1-beta.1) to its beta branch (ADR 0271
+# §5). The steps live in the reusable workflow kazoos-publish-to-store.yml of
+# Kazo-ca/Os-AppTemplate (ADR 0271 §7). The pull request is opened with the Kazo OS automation app
+# (organisation secrets of Kazo-ca) or the HACK_STORE_TOKEN secret; without either, the catalog
+# folder stays as an artifact of the run.
+name: Publish to the Kazo OS Store
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    uses: ./.github/workflows/kazoos-publish-to-store.yml
+    with:
+      app-directory: src/Kazo.Os.App
+    secrets: inherit
