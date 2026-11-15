@@ -1,7 +1,8 @@
 # CI of the app: builds and tests the Release profile, the Kazo OS packages from nuget.org at the
-# version of the submodule (ADR 0176 §4, §6). This is what the Kazo OS Store compiles.
-# The steps live in the reusable workflow kazoos-ci.yml of Kazo-ca/Os-AppTemplate (ADR 0271 §7):
-# its inputs add a solution, JavaScript tests or end-to-end tests.
+# version of the external/KazoOs submodule (Kazo OS ADR 0176 §4, §6). This is what the Kazo OS
+# Store compiles. The steps live in the reusable workflow kazoos-ci.yml of Kazo-ca/Os-AppTemplate
+# (ADR 0271 §7): submodule check, README check, build, C# tests.
+# The Kazo OS SDK update (sdk-update.yml) runs the same CI with the same inputs.
 name: CI
 
 on:
@@ -12,7 +13,44 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   build:
-    # The template repository runs its own copy, so a change is tested before it is tagged.
-    uses: ./.github/workflows/kazoos-ci.yml
+    uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-ci.yml@v1
+    with:
+      solution: Kazo.Ai.slnx
+      npm-test: false
+      e2e-test: false
+
+  # The Store build: Kazo OS packs and loads one assembly per app (Kazo-ca/Os#419), so the package
+  # must hold exactly lib/Kazo.Ai.dll (the extensions are compiled in, src/Kazo.Ai/Extensions/).
+  # A step of this repository, next to the shared CI.
+  store-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch the Kazo OS submodule
+        run: git submodule update --init --depth 1 external/KazoOs
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Check the Kazo OS submodule
+        run: bash .github/scripts/check-kazoos-submodule.sh
+
+      - name: Pack as the Kazo OS Store builds it
+        run: |
+          dotnet build src/Kazo.Ai -c Release -t:KazoOsPack -p:KazoOsPackageOutput="$RUNNER_TEMP/packages"
+          package=$(ls "$RUNNER_TEMP"/packages/*/*.kazoapp)
+          unzip -Z1 "$package"
+          libraries=$(unzip -Z1 "$package" | grep -E '^lib/[^/]+\.dll$' || true)
+          if [[ "$libraries" != "lib/Kazo.Ai.dll" ]]; then
+            echo "::error::The package must hold only lib/Kazo.Ai.dll (Kazo-ca/Os#419), it holds: $libraries"
+            exit 1
+          fi

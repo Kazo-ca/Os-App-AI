@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="AddPersona" xml:space="preserve">
+    <value>Add the persona</value>
+  </data>
+  <data name="AddService" xml:space="preserve">
+    <value>Add an OpenAI-compatible service</value>
+  </data>
+  <data name="ApiKey" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="ApiKeyPlaceholder" xml:space="preserve">
+    <value>Paste the key</value>
+  </data>
+  <data name="AppLabel" xml:space="preserve">
+    <value>Kazo AI</value>
+  </data>
+  <data name="AppName" xml:space="preserve">
+    <value>Kazo AI</value>
+  </data>
+  <data name="AutoLoadLocal" xml:space="preserve">
+    <value>Load the local model at start when it is already downloaded</value>
+  </data>
+  <data name="AutoTune" xml:space="preserve">
+    <value>AutoTune</value>
+  </data>
+  <data name="Bad" xml:space="preserve">
+    <value>Bad answer</value>
+  </data>
+  <data name="BaseUrl" xml:space="preserve">
+    <value>Address of the API</value>
+  </data>
+  <data name="BaseUrlInvalid" xml:space="preserve">
+    <value>The address must start with https:// (http:// only for localhost).</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ClosePanel" xml:space="preserve">
+    <value>Close the panel</value>
+  </data>
+  <data name="Context_Analytical" xml:space="preserve">
+    <value>analytical</value>
+  </data>
+  <data name="Context_Chaotic" xml:space="preserve">
+    <value>chaotic</value>
+  </data>
+  <data name="Context_Code" xml:space="preserve">
+    <value>code</value>
+  </data>
+  <data name="Context_Conversational" xml:space="preserve">
+    <value>conversation</value>
+  </data>
+  <data name="Context_Creative" xml:space="preserve">
+    <value>creative</value>
+  </data>
+  <data name="ConversationTitle" xml:space="preserve">
+    <value>Title of the conversation</value>
+  </data>
+  <data name="Conversations" xml:space="preserve">
+    <value>Conversations</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied to the clipboard.</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="DataHelp" xml:space="preserve">
+    <value>Export the settings, personas and JSON modules to a file, or import such a file. API keys are never exported.</value>
+  </data>
+  <data name="DefaultPersona" xml:space="preserve">
+    <value>Persona of new conversations</value>
+  </data>
+  <data name="DeleteConversation" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteConversationQuestion" xml:space="preserve">
+    <value>Delete the conversation "{0}"?</value>
+  </data>
+  <data name="DeleteKey" xml:space="preserve">
+    <value>Delete the key</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="DetectedContext" xml:space="preserve">
+    <value>Detected context:</value>
+  </data>
+  <data name="Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Emoji" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="ErrorAuth" xml:space="preserve">
+    <value>The service refused the key: check it in Settings.</value>
+  </data>
+  <data name="ErrorCredits" xml:space="preserve">
+    <value>The account of the service has no credit left.</value>
+  </data>
+  <data name="ErrorNetwork" xml:space="preserve">
+    <value>The service could not be reached (network, address, or CORS).</value>
+  </data>
+  <data name="ErrorNotAllowed" xml:space="preserve">
+    <value>The network was not allowed for this app.</value>
+  </data>
+  <data name="ErrorNotFound" xml:space="preserve">
+    <value>The service does not know this model.</value>
+  </data>
+  <data name="ErrorRateLimit" xml:space="preserve">
+    <value>Too many requests: wait a moment and try again.</value>
+  </data>
+  <data name="ErrorServer" xml:space="preserve">
+    <value>The service had an error.</value>
+  </data>
+  <data name="ErrorTimeout" xml:space="preserve">
+    <value>The service took too long to answer.</value>
+  </data>
+  <data name="ErrorUnavailable" xml:space="preserve">
+    <value>This model is not available: check the service in Settings.</value>
+  </data>
+  <data name="ErrorUnknown" xml:space="preserve">
+    <value>The answer failed.</value>
+  </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Exported" xml:space="preserve">
+    <value>Settings exported (without the API keys).</value>
+  </data>
+  <data name="FeedbackCount" xml:space="preserve">
+    <value>{0} rated answers</value>
+  </data>
+  <data name="Good" xml:space="preserve">
+    <value>Good answer</value>
+  </data>
+  <data name="GpuFound" xml:space="preserve">
+    <value>WebGPU is available ({0}).</value>
+  </data>
+  <data name="GpuMissing" xml:space="preserve">
+    <value>This browser has no WebGPU: the local model cannot run here.</value>
+  </data>
+  <data name="HintKeys" xml:space="preserve">
+    <value>Add your OpenRouter or OpenAI key in Settings, or point to Ollama or LM Studio.</value>
+  </data>
+  <data name="HintLocal" xml:space="preserve">
+    <value>No key? A local model runs on your graphics card with WebGPU, after a one-time download.</value>
+  </data>
+  <data name="HintRace" xml:space="preserve">
+    <value>Race mode asks several models at once and keeps the best answer.</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>Import failed: {0}</value>
+  </data>
+  <data name="ImportModule" xml:space="preserve">
+    <value>Import a JSON module</value>
+  </data>
+  <data name="Imported" xml:space="preserve">
+    <value>Settings imported ({0} module(s)).</value>
+  </data>
+  <data name="InputPlaceholder" xml:space="preserve">
+    <value>Write a message (Enter sends, Shift+Enter for a new line)</value>
+  </data>
+  <data name="KeySaved" xml:space="preserve">
+    <value>saved</value>
+  </data>
+  <data name="LearnFromFeedback" xml:space="preserve">
+    <value>Learn from my 👍 and 👎</value>
+  </data>
+  <data name="ListModels" xml:space="preserve">
+    <value>List the service's models</value>
+  </data>
+  <data name="ListingModels" xml:space="preserve">
+    <value>Listing…</value>
+  </data>
+  <data name="LoadFailed" xml:space="preserve">
+    <value>The saved data could not be read: {0}</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="LocalCached" xml:space="preserve">
+    <value>downloaded</value>
+  </data>
+  <data name="LocalDelete" xml:space="preserve">
+    <value>Delete the download</value>
+  </data>
+  <data name="LocalEnabled" xml:space="preserve">
+    <value>Use the local model</value>
+  </data>
+  <data name="LocalHelp" xml:space="preserve">
+    <value>The local model runs in the browser on the graphics card (WebGPU). Its weights are downloaded once from Hugging Face and kept in the browser cache; nothing you write leaves the computer.</value>
+  </data>
+  <data name="LocalLoad" xml:space="preserve">
+    <value>Download and load</value>
+  </data>
+  <data name="LocalLoaded" xml:space="preserve">
+    <value>Loaded: {0}</value>
+  </data>
+  <data name="LocalLoading" xml:space="preserve">
+    <value>Loading the local model:</value>
+  </data>
+  <data name="LocalModel" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="LocalNotLoaded" xml:space="preserve">
+    <value>Not loaded</value>
+  </data>
+  <data name="LocalUnload" xml:space="preserve">
+    <value>Unload</value>
+  </data>
+  <data name="LowResource" xml:space="preserve">
+    <value>light</value>
+  </data>
+  <data name="MaxTokens" xml:space="preserve">
+    <value>Longest answer in tokens (0: the service decides)</value>
+  </data>
+  <data name="Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="ModeRace" xml:space="preserve">
+    <value>Race: several models at once, the best answer wins</value>
+  </data>
+  <data name="ModeSingle" xml:space="preserve">
+    <value>One model</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Models" xml:space="preserve">
+    <value>Models (one per line)</value>
+  </data>
+  <data name="ModelsFound" xml:space="preserve">
+    <value>{0} models found: pick one to add it</value>
+  </data>
+  <data name="ModelsPlaceholder" xml:space="preserve">
+    <value>for example openai/gpt-4o-mini</value>
+  </data>
+  <data name="ModuleErrors" xml:space="preserve">
+    <value>{0} module file(s) could not be loaded: see Settings &gt; Modules.</value>
+  </data>
+  <data name="ModuleImported" xml:space="preserve">
+    <value>Module "{0}" added.</value>
+  </data>
+  <data name="ModulesApplied" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="ModulesHelp" xml:space="preserve">
+    <value>Modules change the request before it leaves or the answer before it is shown. JSON modules can be imported here; C# modules are compiled into the app (see the docs).</value>
+  </data>
+  <data name="NeedsKey" xml:space="preserve">
+    <value>Needs an API key</value>
+  </data>
+  <data name="NewConversation" xml:space="preserve">
+    <value>New conversation</value>
+  </data>
+  <data name="NoConversations" xml:space="preserve">
+    <value>No conversation yet.</value>
+  </data>
+  <data name="NoNetwork" xml:space="preserve">
+    <value>The network was not allowed for this app: only a local model already downloaded can answer.</value>
+  </data>
+  <data name="Origin_built-in" xml:space="preserve">
+    <value>built-in</value>
+  </data>
+  <data name="Origin_extension" xml:space="preserve">
+    <value>extension</value>
+  </data>
+  <data name="Origin_file" xml:space="preserve">
+    <value>JSON file</value>
+  </data>
+  <data name="Persona" xml:space="preserve">
+    <value>Persona</value>
+  </data>
+  <data name="PersonaName" xml:space="preserve">
+    <value>Name of a new persona</value>
+  </data>
+  <data name="PickModel" xml:space="preserve">
+    <value>Search a model</value>
+  </data>
+  <data name="PreferLocal" xml:space="preserve">
+    <value>Use the local model when the chosen service has no key</value>
+  </data>
+  <data name="Race" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="RaceChars" xml:space="preserve">
+    <value>{0} characters</value>
+  </data>
+  <data name="RaceMinDelta" xml:space="preserve">
+    <value>Points needed to take the lead</value>
+  </data>
+  <data name="RaceModels" xml:space="preserve">
+    <value>Race models (service:model, one per line)</value>
+  </data>
+  <data name="RaceOption" xml:space="preserve">
+    <value>Race of {0} models</value>
+  </data>
+  <data name="RaceProgress" xml:space="preserve">
+    <value>{0} / {1} done</value>
+  </data>
+  <data name="RaceSummary" xml:space="preserve">
+    <value>Race: {0} of {1} models answered</value>
+  </data>
+  <data name="Regenerate" xml:space="preserve">
+    <value>Answer again</value>
+  </data>
+  <data name="ReloadModules" xml:space="preserve">
+    <value>Read the modules folder again</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="RemoveService" xml:space="preserve">
+    <value>Remove the service</value>
+  </data>
+  <data name="RenameConversation" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="ResetFeedback" xml:space="preserve">
+    <value>Forget what was learned</value>
+  </data>
+  <data name="SaveKey" xml:space="preserve">
+    <value>Save the key</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="ServiceName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ServicesHelp" xml:space="preserve">
+    <value>Any service that speaks the OpenAI chat API works. Keys stay in the Kazo OS keyring and are sent only to their service.</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Stopped" xml:space="preserve">
+    <value>stopped</value>
+  </data>
+  <data name="Strategy" xml:space="preserve">
+    <value>Strategy</value>
+  </data>
+  <data name="Strategy_Adaptive" xml:space="preserve">
+    <value>Adaptive (follows the conversation)</value>
+  </data>
+  <data name="Strategy_Balanced" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
+  <data name="Strategy_Chaotic" xml:space="preserve">
+    <value>Chaotic</value>
+  </data>
+  <data name="Strategy_Creative" xml:space="preserve">
+    <value>Creative</value>
+  </data>
+  <data name="Strategy_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="Strategy_Precise" xml:space="preserve">
+    <value>Precise</value>
+  </data>
+  <data name="SystemPrompt" xml:space="preserve">
+    <value>Instructions (system prompt)</value>
+  </data>
+  <data name="TabChat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="TabData" xml:space="preserve">
+    <value>Import / export</value>
+  </data>
+  <data name="TabLocal" xml:space="preserve">
+    <value>Local model</value>
+  </data>
+  <data name="TabModules" xml:space="preserve">
+    <value>Modules</value>
+  </data>
+  <data name="TabServices" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="Thinking" xml:space="preserve">
+    <value>Thinking…</value>
+  </data>
+  <data name="Untitled" xml:space="preserve">
+    <value>Untitled</value>
+  </data>
+  <data name="WelcomeText" xml:space="preserve">
+    <value>Chat with the AI models of your choice, with your own keys, or with a model that runs in your browser.</value>
+  </data>
+  <data name="WelcomeTitle" xml:space="preserve">
+    <value>What can I help with?</value>
+  </data>
+</root>

@@ -6,10 +6,11 @@
 #     CI is green, then tagged and published;
 #   - a stable patch release: checked only (the pull request is closed once green).
 # A red CI opens a TODO issue and changes nothing. The steps live in the reusable workflow
-# kazoos-sdk-update.yml of Kazo-ca/Os-AppTemplate (ADR 0271 §7).
+# kazoos-sdk-update.yml of Kazo-ca/Os-AppTemplate (ADR 0271 §7); its CI inputs are the ones of
+# ci.yml, so the update is tested like a pull request.
 #
-# Started by Kazo OS (repository_dispatch kazoos-sdk-released, for the repositories it lists),
-# every hour otherwise, or by hand from the Actions tab.
+# Started by Kazo OS (repository_dispatch kazoos-sdk-released, this repository is listed in its
+# build/app-repositories.txt), every hour otherwise, or by hand from the Actions tab.
 name: Kazo OS SDK update
 
 on:
@@ -35,9 +36,12 @@ permissions:
 
 jobs:
   update:
-    uses: ./.github/workflows/kazoos-sdk-update.yml
+    uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-sdk-update.yml@v1
     with:
-      app-directory: src/Kazo.Os.App
+      app-directory: src/Kazo.Ai
       version: ${{ github.event.client_payload.version || inputs.version || '' }}
       force: ${{ inputs.force || false }}
+      solution: Kazo.Ai.slnx
+      npm-test: false
+      e2e-test: false
     secrets: inherit

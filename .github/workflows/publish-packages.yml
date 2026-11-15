@@ -1,7 +1,7 @@
-# Publishes the app on the kazoos-packages branch of this repository for a tag v<version> (ADR 0182
-# §2, ADR 0219 §4), so that "kazopkg install <owner>/<repo>" installs it without the Kazo OS Store.
-# Unsigned: apps are signed only in the marketplace repository (ADR 0219). The steps live in the
-# reusable workflow kazoos-publish-packages.yml of Kazo-ca/Os-AppTemplate (ADR 0271 §7).
+# Publishes the app on the kazoos-packages branch of this repository for a tag v<version> (Kazo OS
+# ADR 0182 §2, ADR 0219 §4), so that "kazopkg install <owner>/<repo>" installs it without the Kazo
+# OS Store. Unsigned: apps are signed only in the marketplace repository (ADR 0219). The steps live
+# in the reusable workflow kazoos-publish-packages.yml of Kazo-ca/Os-AppTemplate (ADR 0271 §7).
 name: Publish the Kazo OS packages
 
 on:
@@ -14,6 +14,6 @@ permissions:
 
 jobs:
   publish:
-    uses: ./.github/workflows/kazoos-publish-packages.yml
+    uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-publish-packages.yml@v1
     with:
-      app-directory: src/Kazo.Os.App
+      app-directory: src/Kazo.Ai

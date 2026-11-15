@@ -4,21 +4,65 @@
 
 <img src="store/icon.png" alt="" width="96" align="right">
 
-# Kazo.Os.App
+# Kazo AI
 
-Describe your app here: what it does, how to use it, what it needs.
+A chat with AI models for Kazo OS, written in C# and Blazor, on a computer and on a phone. Bring
+your own API keys, or run a model directly in your browser: nothing to install, no account needed.
 
-This text is shown on the app's page in the Kazo OS Store.
+## Your models, your keys
+
+- **OpenRouter, OpenAI, Ollama, LM Studio**, and any service that speaks the OpenAI chat API: add
+  its address, paste your key, list its models and pick one.
+- Keys stay in the **Kazo OS keyring** and are sent only to their own service, straight from the
+  browser. They are never written to a file and never exported.
+- Answers are streamed as they are written, in Markdown, with code blocks and tables.
+
+## A local model, on your graphics card
+
+- No key? Kazo AI runs a small open model **in the browser with WebGPU** (WebLLM): Qwen, Llama,
+  Phi, Gemma and others. The model is downloaded once and kept in the browser cache.
+- What you write to the local model never leaves your computer.
+- It loads by itself at start when already downloaded, and takes over when the chosen service has
+  no key.
+
+## Race and AutoTune
+
+- **Race mode** asks several models at once, scores their answers as they arrive, shows the
+  leader live, and keeps the best one, with the full ranking.
+- **AutoTune** reads the conversation (code, writing, analysis, small talk...) and sets the
+  temperature and the other sampling parameters for each answer. Rate answers with 👍 and 👎 and it
+  learns your taste; or choose a fixed strategy, or set everything by hand.
+
+## Personas and modules
+
+- Personas (assistant, developer, writer, teacher, or your own) give the system prompt of a
+  conversation.
+- **Modules** change the request before it leaves or the answer before it is shown: a few are
+  built in, more can be imported as simple JSON files, and developers can compile their own C#
+  modules into the app.
+- Settings, personas and modules are exported and imported as one JSON file.
+
+## Administrator approval
+
+Kazo AI asks for access to the **real network** (`network.real.access`) to reach the AI services
+and to download the local model. Kazo OS asks an administrator to approve it at the first launch.
+
+## Screenshots
+
+<p>
+  <img src="store/screenshots/01-chat.png" alt="Kazo AI, screenshot 1" height="240">
+  <img src="store/screenshots/02-race.png" alt="Kazo AI, screenshot 2" height="240">
+  <img src="store/screenshots/03-settings.png" alt="Kazo AI, screenshot 3" height="240">
+  <img src="store/screenshots/04-narrow.png" alt="Kazo AI, screenshot 4" height="240">
+</p>
 
 <!-- /Store listing -->
 
 ## Try it
 
-<!-- Replace com.example.my-app with your app id (the Id of the [AppManifest] class). -->
-[Open Kazo.Os.App in Kazo OS](https://os.kazo.ca/?autolaunch=com.example.my-app): the link starts Kazo OS, installs the app from the official Store and opens it.
+[Open Kazo AI in Kazo OS](https://os.kazo.ca/?autolaunch=ca.kazo.ai): the link starts Kazo OS, installs the app from the official Store and opens it.
 
-Or open [Kazo OS](https://os.kazo.ca/) and install Kazo.Os.App from the **Kazo OS Store**, or in the Kazo OS
-Terminal, as an administrator: `sudo kazopkg install <owner>/<repository>`.
+Or open [Kazo OS](https://os.kazo.ca/) and install Kazo AI from the **Kazo OS Store** (category Productivity), or in the Kazo OS Terminal, as an administrator: `sudo kazopkg install Kazo-ca/Os-App-AI`.
 
 ## About Kazo OS
 
@@ -26,108 +70,35 @@ Terminal, as an administrator: `sudo kazopkg install <owner>/<repository>`.
 
 ## Development
 
-A Kazo OS app repository, made with the `kazoos-solution` template.
+- Architecture of the code: [English](doc/en/architecture.md) · [Français](doc/fr/architecture.md)
+- Writing modules (JSON and C#): [English](doc/en/modules.md) · [Français](doc/fr/modules.md)
+- AI services, local model and data formats: [English](doc/en/providers.md) · [Français](doc/fr/providers.md)
+- License: MIT ([LICENSE](LICENSE)); third-party works: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-| Folder | Content |
-| --- | --- |
-| `src/Kazo.Os.App` | The app (window app, its `[AppManifest]` class generates `manifest.json`) |
-| `src/Kazo.Os.App.Os` | A host that runs the whole Kazo OS with the base apps and this app: the project to start |
-| `tests/Kazo.Os.App.Tests` | Tests of the app |
-| `external/KazoOs` | The Kazo OS repository as a git submodule, on a release tag |
-| `store/` | What the Kazo OS Store shows: icon (PNG 256×256), short descriptions, descriptions, `store.json` |
-
-### First steps
+### Build and run
 
 ```bash
-# A repository created from the GitHub template already has the submodule:
-git clone --recurse-submodules <your repository>
-
-# A folder made with "dotnet new kazoos-solution" adds it once:
-git init
-git submodule add --depth 1 https://github.com/Kazo-ca/Os.git external/KazoOs
-git -C external/KazoOs checkout v<Kazo OS version>
+git clone --recurse-submodules https://github.com/Kazo-ca/Os-App-AI.git
+cd Os-App-AI
+dotnet run --project src/Kazo.Ai.Os      # Kazo OS with the Kazo AI app
 ```
 
-Then open the `.sln` in Visual Studio or Rider and start `Kazo.Os.App.Os`, or run
-`dotnet run --project src/Kazo.Os.App.Os`.
+The `external/KazoOs` submodule is Kazo OS on its release tag (3.3.4): it gives the version of the
+Kazo OS packages. `Debug` builds the OS from the submodule's sources, `Release` takes the packages
+from nuget.org (what CI and the Kazo OS Store build).
 
-### The Kazo OS version
-
-`external/KazoOs/wasm2/KazoOs/build/Versions.props` is the Kazo OS version of this repository.
-To move to another version, move the submodule to its tag and commit it:
+### Tests
 
 ```bash
-git -C external/KazoOs fetch --depth 1 origin tag v2.2.0
-git -C external/KazoOs checkout v2.2.0
-git add external/KazoOs
+dotnet build Kazo.Ai.slnx -c Release
+dotnet test Kazo.Ai.slnx -c Release --no-build
+dotnet build src/Kazo.Ai -c Release -t:KazoOsPack   # the Store package: one assembly, lib/Kazo.Ai.dll
 ```
 
-Never edit the submodule: the OS is not modified from an app repository, and CI refuses a
-submodule with local changes or off its tag.
+### Credits
 
-### Two build profiles
-
-| Profile | Kazo OS comes from | Use |
-| --- | --- | --- |
-| `Debug` | the projects of the submodule (`KazoOsUseSource=true`) | step into the SDK and the OS, breakpoints anywhere |
-| `Release` | the `Kazo.Os.*` packages of nuget.org, at the submodule's version | CI, `dotnet publish`, the Kazo OS Store |
-
-Force either one with `-p:KazoOsUseSource=true` or `false`.
-
-### Publishing to the Kazo OS Store
-
-1. Fill `store/` (icon, short descriptions, descriptions, screenshots, category and tags in
-   `store.json`), then run `node .github/scripts/store-readme.mjs`: it copies the descriptions and
-   screenshots to the top of `README.md` and `readme-fr.md`, so the repository shows the same listing
-   as the Store. CI fails when a README differs from `store/`.
-2. Change `Version` in the app's `[AppManifest]` class and commit it to `main`, then tag it: run the
-   **Tag a release** workflow (Actions tab, or the GitHub API for an agent), which tags the head of
-   `main` with the manifest's version and starts the two publishing workflows; or push the tag
-   yourself: `git tag v1.0.0 && git push --tags`.
-3. The **Publish to the Kazo OS Store** workflow builds the app and makes the catalog folder
-   `apps/<appId>_<version>/`. With a `HACK_STORE_TOKEN` secret (a token allowed to fork and open
-   pull requests), it opens the pull request to `Kazo-ca/Os-AppMarketPlace` from your fork;
-   without it, download the run's artifact and open the pull request yourself.
-
-`HACK_STORE_TOKEN` is a GitHub personal access token of yours, not something Kazo OS gives you:
-
-1. GitHub ▸ **Settings** ▸ **Developer settings** ▸ **Personal access tokens** ▸ **Tokens (classic)** ▸
-   **Generate new token (classic)**, with a short expiration and the **`repo`** and **`workflow`**
-   scopes (a fine-grained token cannot cover both your fork and the catalog's repository).
-2. Copy it (shown once) into this repository: **Settings** ▸ **Secrets and variables** ▸ **Actions** ▸
-   **New repository secret**, name `HACK_STORE_TOKEN` (or `gh secret set HACK_STORE_TOKEN`).
-
-`repo` reaches all your repositories: keep the token only in this secret and revoke it if in doubt.
-
-The catalog never takes a binary from you: once your pull request is reviewed and merged, its CI
-compiles the app at the tagged commit.
-
-### Following new Kazo OS versions
-
-The **Kazo OS SDK update** workflow (`sdk-update.yml`) runs every hour, when Kazo OS announces a
-release, or by hand from the Actions tab. When Kazo OS has a newer version, it moves the submodule
-to it, raises the app's version (`.github/scripts/bump-app-version.sh`) on a `kazoos-sdk/<version>`
-branch and runs the CI there:
-
-- a Kazo OS pre-release: the `beta` branch takes it, as version `x.y.(z+1)-beta.<n>`, which goes to
-  the beta channel of the Kazo OS Store;
-- a minor or major stable release: a pull request to `main`, merged, tagged and published;
-- a patch stable release: checked only, nothing is published.
-
-A red CI opens a `TODO` issue and changes nothing. A version with a suffix (`1.2.1-beta.1`) is
-always published from `beta`, one without from `main`. The workflows of this repository are short:
-they call the shared workflows of [Kazo-ca/Os-AppTemplate](https://github.com/Kazo-ca/Os-AppTemplate)
-(`@v1`), so they improve without a change here. Without the Kazo OS automation secrets, allow GitHub
-Actions to create pull requests (**Settings** ▸ **Actions** ▸ **General**) for the update to open its
-pull request.
-
-### Publishing on the `kazoos-packages` branch
-
-The same `v*` tag also runs **Publish the Kazo OS packages**: it packs the app and pushes it to the
-`kazoos-packages` branch of this repository, keeping the versions already published. Kazo OS
-users then install it with `kazopkg install <owner>/<repo>`, without the Kazo OS Store.
-
-These packages are not signed: apps are signed only in the Kazo OS Store repository
-(`Kazo-ca/Os-AppMarketPlace`), when it builds your app from the catalog (ADR 0219). Kazo OS checks
-them by their SHA-256 and asks an administrator before installing from an untrusted source. Users
-who want a signed package install your app from the Kazo OS Store.
+The race between models, the AutoTune of the sampling parameters and the learning from ratings were
+inspired by the open-source project [G0DM0D3](https://github.com/elder-plinius/G0DM0D3) by
+elder-plinius. Kazo AI is a separate implementation in C#: it contains none of its code, prompts or
+content. The data shapes of these features (sampling parameters, context types, race events) follow
+the same names, documented in [providers.md](doc/en/providers.md).

@@ -1,0 +1,145 @@
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+
+@* One message of the conversation: the person's, or an answer with its model, its time, what
+   AutoTune chose, the race it won, the modules that ran, and its buttons. *@
+<article class="ai-message @(Message.Role == ChatRole.User ? "user" : "assistant") @(Message.Error is null ? null : "failed")">
+    @if (Message.Role == ChatRole.User)
+    {
+        <div class="ai-bubble">@Message.Content</div>
+    }
+    else
+    {
+        <header class="ai-message-meta">
+            <span class="ai-avatar" aria-hidden="true">✦</span>
+            @if (!string.IsNullOrEmpty(Message.Model))
+            {
+                <span class="ai-model-name">@ModelLabel</span>
+            }
+            @if (!string.IsNullOrEmpty(Duration))
+            {
+                <span class="ai-muted">@Duration</span>
+            }
+            @if (Message.Stopped)
+            {
+                <span class="ai-chip warn">@L["Stopped"]</span>
+            }
+        </header>
+
+        @if (Message.Content.Length > 0)
+        {
+            <div class="ai-markdown">@((MarkupString)Kazo.Ai.Markdown.MarkdownRenderer.ToHtml(Message.Content))</div>
+        }
+        @if (ErrorText is not null)
+        {
+            <p class="ai-error" role="alert">@ErrorText</p>
+        }
+
+        @if (Message.AutoTune is { } tune || Message.Race is not null || Message.ModulesApplied.Count > 0)
+        {
+            <details class="ai-details">
+                <summary>@L["Details"]</summary>
+                @if (Message.AutoTune is { } autoTune)
+                {
+                    <section>
+                        <h3>@L["AutoTune"]</h3>
+                        <p>
+                            @L["DetectedContext"] <strong>@L["Context_" + autoTune.DetectedContext.ToString()]</strong>
+                            (@((autoTune.Confidence * 100).ToString("0", CultureInfo.CurrentCulture)) %)
+                        </p>
+                        <p class="ai-muted">@autoTune.Reasoning</p>
+                        <table class="ai-params">
+                            <tbody>
+                                @foreach (string name in SamplingParameters.Names)
+                                {
+                                    double after = autoTune.Params.Get(name);
+                                    double before = autoTune.BaselineParams.Get(name);
+                                    <tr>
+                                        <th scope="row">@name</th>
+                                        <td>@after.ToString("0.###", CultureInfo.InvariantCulture)</td>
+                                        <td class="ai-muted">@(Math.Abs(after - before) > 0.0005 ? "(" + before.ToString("0.###", CultureInfo.InvariantCulture) + ")" : null)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </section>
+                }
+                @if (Message.Race is { } race)
+                {
+                    <section>
+                        <h3>@string.Format(CultureInfo.CurrentCulture, L["RaceSummary"], race.ModelsSucceeded, race.ModelsQueried)</h3>
+                        <ol class="ai-ranking">
+                            @foreach (RaceRanking ranking in race.Rankings)
+                            {
+                                <li class="@(ranking.Success ? null : "failed")">
+                                    <span>@ranking.Model</span>
+                                    <span class="ai-muted">@(ranking.Success ? ranking.Score.ToString("0", CultureInfo.InvariantCulture) + " · " + ranking.DurationMs.ToString(CultureInfo.CurrentCulture) + " ms" : ranking.Error)</span>
+                                </li>
+                            }
+                        </ol>
+                    </section>
+                }
+                @if (Message.ModulesApplied.Count > 0)
+                {
+                    <section>
+                        <h3>@L["ModulesApplied"]</h3>
+                        <p>@string.Join(", ", Message.ModulesApplied)</p>
+                    </section>
+                }
+            </details>
+        }
+
+        <footer class="ai-message-actions">
+            @if (Message.Content.Length > 0)
+            {
+                <button type="button" class="ai-icon-button" title="@L["Copy"]" aria-label="@L["Copy"]" @onclick="OnCopy">⧉</button>
+                <button type="button" class="ai-icon-button @(Message.Rating == 1 ? "active" : null)" title="@L["Good"]" aria-label="@L["Good"]"
+                        aria-pressed="@(Message.Rating == 1 ? "true" : "false")" @onclick="() => OnRate.InvokeAsync(1)">👍</button>
+                <button type="button" class="ai-icon-button @(Message.Rating == -1 ? "active" : null)" title="@L["Bad"]" aria-label="@L["Bad"]"
+                        aria-pressed="@(Message.Rating == -1 ? "true" : "false")" @onclick="() => OnRate.InvokeAsync(-1)">👎</button>
+            }
+            @if (CanRegenerate)
+            {
+                <button type="button" class="ai-icon-button" title="@L["Regenerate"]" aria-label="@L["Regenerate"]" @onclick="OnRegenerate">↻</button>
+            }
+        </footer>
+    }
+</article>
+
+@code {
+    /// <summary>Gets or sets the message.</summary>
+    [Parameter, EditorRequired]
+    public ConversationMessage Message { get; set; } = default!;
+
+    /// <summary>Gets or sets the app's texts.</summary>
+    [Parameter, EditorRequired]
+    public IStringLocalizer L { get; set; } = default!;
+
+    /// <summary>Gets or sets the name shown for the answer's model.</summary>
+    [Parameter]
+    public string? ModelLabel { get; set; }
+
+    /// <summary>Gets or sets the explained error, when the answer failed.</summary>
+    [Parameter]
+    public string? ErrorText { get; set; }
+
+    /// <summary>Gets or sets the time the answer took, as text.</summary>
+    [Parameter]
+    public string? Duration { get; set; }
+
+    /// <summary>Gets or sets whether the answer can be written again (the last one).</summary>
+    [Parameter]
+    public bool CanRegenerate { get; set; }
+
+    /// <summary>Gets or sets what copies the answer.</summary>
+    [Parameter]
+    public EventCallback OnCopy { get; set; }
+
+    /// <summary>Gets or sets what rates the answer (+1 or -1).</summary>
+    [Parameter]
+    public EventCallback<int> OnRate { get; set; }
+
+    /// <summary>Gets or sets what writes the answer again.</summary>
+    [Parameter]
+    public EventCallback OnRegenerate { get; set; }
+}
