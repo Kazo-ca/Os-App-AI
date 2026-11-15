@@ -8,7 +8,7 @@ namespace Kazo.Ai.Modules;
 /// <summary>
 /// A module written as a JSON file, with no code: dropped in <c>~/.config/ca.kazo.ai/modules/</c>
 /// (or imported from the settings), it can add text to the system message and replace text in the
-/// answers with regular expressions. The format is in doc/en/extending.md.
+/// answers with regular expressions. The format is in doc/en/modules.md.
 /// </summary>
 public sealed class DeclarativeModuleDefinition
 {

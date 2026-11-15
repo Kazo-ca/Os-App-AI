@@ -1,10 +1,7 @@
 # CI of the app: builds and tests the Release profile, the Kazo OS packages from nuget.org at the
 # version of the external/KazoOs submodule (Kazo OS ADR 0176 §4, §6). This is what the Kazo OS
 # Store compiles. The steps live in the reusable workflow kazoos-ci.yml of Kazo-ca/Os-AppTemplate
-# (ADR 0271 §7): submodule check, README check, build, C# tests. The solution
-# is built with IrcDemoNetwork=true (the demonstration network, an IRC server in memory, that the
-# C# and end-to-end tests talk to); the shared workflow passes "solution" unquoted to dotnet, so the
-# property follows the solution. The Store and the packages are built without it.
+# (ADR 0271 §7): submodule check, README check, build, C# tests.
 # The Kazo OS SDK update (sdk-update.yml) runs the same CI with the same inputs.
 name: CI
 
@@ -24,13 +21,13 @@ jobs:
   build:
     uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-ci.yml@v1
     with:
-      solution: 'Kazo.Irc.slnx -p:IrcDemoNetwork=true'
+      solution: Kazo.Ai.slnx
       npm-test: false
-      e2e-test: true
+      e2e-test: false
 
-  # The Store build (Release without the demonstration network, IrcSingleAssembly): Kazo OS packs
-  # and loads one assembly per app (Kazo-ca/Os#419), so the package must hold exactly
-  # lib/Kazo.Irc.dll. A step of this repository, next to the shared CI.
+  # The Store build: Kazo OS packs and loads one assembly per app (Kazo-ca/Os#419), so the package
+  # must hold exactly lib/Kazo.Ai.dll (the extensions are compiled in, src/Kazo.Ai/Extensions/).
+  # A step of this repository, next to the shared CI.
   store-package:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -49,15 +46,11 @@ jobs:
 
       - name: Pack as the Kazo OS Store builds it
         run: |
-          dotnet build src/Kazo.Irc -c Release -t:KazoOsPack -p:KazoOsPackageOutput="$RUNNER_TEMP/packages"
+          dotnet build src/Kazo.Ai -c Release -t:KazoOsPack -p:KazoOsPackageOutput="$RUNNER_TEMP/packages"
           package=$(ls "$RUNNER_TEMP"/packages/*/*.kazoapp)
           unzip -Z1 "$package"
           libraries=$(unzip -Z1 "$package" | grep -E '^lib/[^/]+\.dll$' || true)
-          if [[ "$libraries" != "lib/Kazo.Irc.dll" ]]; then
-            echo "::error::The package must hold only lib/Kazo.Irc.dll (Kazo-ca/Os#419), it holds: $libraries"
-            exit 1
-          fi
-          if unzip -Z1 "$package" | grep -q 'Kazo.Irc.Demo'; then
-            echo "::error::The Store package holds the demonstration network."
+          if [[ "$libraries" != "lib/Kazo.Ai.dll" ]]; then
+            echo "::error::The package must hold only lib/Kazo.Ai.dll (Kazo-ca/Os#419), it holds: $libraries"
             exit 1
           fi

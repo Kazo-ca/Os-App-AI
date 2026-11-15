@@ -18,5 +18,5 @@ jobs:
   submit:
     uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-publish-to-store.yml@v1
     with:
-      app-directory: src/Kazo.Irc
+      app-directory: src/Kazo.Ai
     secrets: inherit

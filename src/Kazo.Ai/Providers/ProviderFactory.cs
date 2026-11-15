@@ -5,7 +5,7 @@ namespace Kazo.Ai.Providers;
 
 /// <summary>
 /// Makes the providers of the settings. To add a kind of provider (a service that does not speak
-/// the OpenAI format), add a <see cref="ProviderKind"/> and a case here (doc/en/extending.md).
+/// the OpenAI format), add a <see cref="ProviderKind"/> and a case here (doc/en/providers.md).
 /// </summary>
 public sealed class ProviderFactory
 {

@@ -38,10 +38,10 @@ jobs:
   update:
     uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-sdk-update.yml@v1
     with:
-      app-directory: src/Kazo.Irc
+      app-directory: src/Kazo.Ai
       version: ${{ github.event.client_payload.version || inputs.version || '' }}
       force: ${{ inputs.force || false }}
-      solution: 'Kazo.Irc.slnx -p:IrcDemoNetwork=true'
+      solution: Kazo.Ai.slnx
       npm-test: false
-      e2e-test: true
+      e2e-test: false
     secrets: inherit

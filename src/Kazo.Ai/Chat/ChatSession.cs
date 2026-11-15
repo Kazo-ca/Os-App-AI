@@ -415,8 +415,9 @@ public sealed class ChatSession
         {
             answer = answer with { Content = PendingText, Model = PendingModel, Error = exception.Message, ErrorKind = exception.Kind.ToString() };
         }
-        catch (Exception exception) when (exception is InvalidOperationException or FormatException or ArgumentException or System.Text.Json.JsonException)
+        catch (Exception exception) when (exception is not OperationCanceledException)
         {
+            // A module or a provider that fails in an unexpected way fails this answer only.
             answer = answer with { Content = PendingText, Model = PendingModel, Error = exception.Message, ErrorKind = AiErrorKind.Unknown.ToString() };
         }
 

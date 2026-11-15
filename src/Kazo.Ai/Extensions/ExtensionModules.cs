@@ -6,7 +6,7 @@ namespace Kazo.Ai.Extensions;
 /// The place to add C# modules to the app, at build time. An installed Kazo OS app is one assembly
 /// (Kazo-ca/Os#419), so extensions are compiled in: put a class implementing
 /// <see cref="IChatModule"/> in this folder and register it in <see cref="RegisterExtensions"/>,
-/// in a new file of this folder (doc/en/extending.md, "C# extensions").
+/// in a new file of this folder (doc/en/modules.md, "C# modules").
 /// </summary>
 /// <example>
 /// <code>

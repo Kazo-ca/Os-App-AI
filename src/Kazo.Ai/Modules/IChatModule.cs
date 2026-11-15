@@ -20,7 +20,7 @@ public enum ModuleStage
 /// An extension of the chat. A module can change the request before it is sent
 /// (<see cref="TransformRequestAsync"/>) and the answer once it arrives (<see cref="TransformResponse"/>).
 /// The person turns modules on and off in the settings; the enabled ones run in the order of
-/// <see cref="Order"/>. See doc/en/extending.md for the three ways to add one (a JSON file, a C#
+/// <see cref="Order"/>. See doc/en/modules.md for the three ways to add one (a JSON file, a C#
 /// class in <c>src/Kazo.Ai/Extensions/</c>, or a whole new provider).
 /// </summary>
 /// <remarks>

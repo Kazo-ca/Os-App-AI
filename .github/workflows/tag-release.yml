@@ -28,7 +28,7 @@ jobs:
   tag:
     uses: Kazo-ca/Os-AppTemplate/.github/workflows/kazoos-tag-release.yml@v1
     with:
-      app-directory: src/Kazo.Irc
+      app-directory: src/Kazo.Ai
       commit: ${{ inputs.commit }}
       branch: ${{ inputs.branch }}
       publish: ${{ inputs.publish }}

@@ -6,7 +6,7 @@ namespace Kazo.Ai.Providers;
 /// A source of answers: an OpenAI-compatible service (OpenRouter, OpenAI, Ollama, LM Studio, any
 /// server that speaks <c>/v1/chat/completions</c>) or the local model in the browser (WebLLM).
 /// Adding another kind of provider means implementing this interface and registering it in
-/// <see cref="ProviderFactory"/> (doc/en/extending.md).
+/// <see cref="ProviderFactory"/> (doc/en/providers.md).
 /// </summary>
 public interface IChatProvider
 {
