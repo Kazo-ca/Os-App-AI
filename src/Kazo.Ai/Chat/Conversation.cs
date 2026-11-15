@@ -51,6 +51,10 @@ public sealed record ConversationMessage
     [JsonPropertyName("error")]
     public string? Error { get; init; }
 
+    /// <summary>What kind of failure <see cref="Error"/> is (an <see cref="Http.AiErrorKind"/> name), so the window can explain it.</summary>
+    [JsonPropertyName("errorKind")]
+    public string? ErrorKind { get; init; }
+
     /// <summary>Gets whether the answer was stopped by the person.</summary>
     [JsonPropertyName("stopped")]
     public bool Stopped { get; init; }

@@ -1,4 +1,4 @@
-// Kazo IA: the local model, in the browser, on the GPU (WebLLM, Apache-2.0, vendored in
+// Kazo AI: the local model, in the browser, on the GPU (WebLLM, Apache-2.0, vendored in
 // ../lib/web-llm/). The model runs in a Web Worker (webllm-worker.js). C# (WebLlmEngine) decides
 // which model, when to load it and what to send; this module only talks to WebLLM and passes the
 // pieces of the answer back (OnChunk / OnEnd), like ai-fetch.js does for the remote services.

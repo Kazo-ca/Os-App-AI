@@ -61,7 +61,7 @@ public sealed class KazoApiKeyStore : IApiKeyStore
     public async ValueTask SetAsync(string providerId, string providerName, string key, CancellationToken cancellationToken = default)
     {
         using IDisposable scope = KazoExecutionContext.Enter(_context);
-        await KazoKeyring.SetAsync(_context, EntryId(providerId), key, $"Kazo IA: {providerName}", cancellationToken);
+        await KazoKeyring.SetAsync(_context, EntryId(providerId), key, $"Kazo AI: {providerName}", cancellationToken);
     }
 
     /// <inheritdoc />

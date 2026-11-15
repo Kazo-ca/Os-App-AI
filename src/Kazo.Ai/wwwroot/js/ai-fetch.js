@@ -1,4 +1,4 @@
-// Kazo IA: the browser's fetch for the AI services (OpenRouter, OpenAI, Ollama, LM Studio...).
+// Kazo AI: the browser's fetch for the AI services (OpenRouter, OpenAI, Ollama, LM Studio...).
 //
 // Why JavaScript: the Kazo OS SDK has no direct HTTP to the Internet without the optional Kazo
 // server (KazoHttpClient goes through its relay), and the published OS trims System.Net.Http, so an

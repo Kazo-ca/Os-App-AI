@@ -1,0 +1,279 @@
+@using System.Globalization
+
+@* The settings, over the conversation: the AI services and their keys, the local model, how the
+   chat answers (mode, race, AutoTune, persona), the modules, and the import and export. Every
+   change is saved at once. *@
+<div class="ai-overlay" role="dialog" aria-modal="true" aria-labelledby="ai-settings-title" @onkeydown="OnKeyDown">
+    <div class="ai-settings">
+        <header class="ai-settings-head">
+            <h2 id="ai-settings-title">@L["Settings"]</h2>
+            <button type="button" class="ai-icon-button" aria-label="@L["Close"]" @onclick="OnClose">×</button>
+        </header>
+        <nav class="ai-tabs" role="tablist">
+            @foreach (SettingsTab tab in Enum.GetValues<SettingsTab>())
+            {
+                <button type="button" role="tab" class="ai-tab @(tab == _tab ? "selected" : null)"
+                        aria-selected="@(tab == _tab ? "true" : "false")" @onclick="() => _tab = tab">@L["Tab" + tab.ToString()]</button>
+            }
+        </nav>
+
+        <div class="ai-settings-body" role="tabpanel">
+            @switch (_tab)
+            {
+                case SettingsTab.Services:
+                    <p class="ai-muted">@L["ServicesHelp"]</p>
+                    @if (_serviceError is not null)
+                    {
+                        <p class="ai-error-text" role="alert">@_serviceError</p>
+                    }
+                    @foreach (ProviderSettings provider in Settings.Providers.Where(p => p.Kind != ProviderKind.WebLlm))
+                    {
+                        <fieldset class="ai-card" @key="provider.Id">
+                            <legend>
+                                <label class="ai-switch">
+                                    <input type="checkbox" checked="@provider.Enabled" @onchange="e => UpdateProviderAsync(provider with { Enabled = IsChecked(e) })" />
+                                    <span>@provider.Name</span>
+                                </label>
+                            </legend>
+                            <label class="ai-field">
+                                <span>@L["BaseUrl"]</span>
+                                <input type="url" value="@provider.BaseUrl" spellcheck="false" @onchange="e => UpdateProviderAsync(provider with { BaseUrl = Text(e) })" />
+                            </label>
+                            @if (!provider.HasValidBaseUrl())
+                            {
+                                <p class="ai-error-text">@L["BaseUrlInvalid"]</p>
+                            }
+                            <label class="ai-check">
+                                <input type="checkbox" checked="@provider.NeedsKey" @onchange="e => UpdateProviderAsync(provider with { NeedsKey = IsChecked(e) })" />
+                                <span>@L["NeedsKey"]</span>
+                            </label>
+                            @if (provider.NeedsKey)
+                            {
+                                <div class="ai-field-row">
+                                    <label class="ai-field">
+                                        <span>@L["ApiKey"] @(HasKey(provider.Id) ? "· " + L["KeySaved"] : null)</span>
+                                        <input type="password" autocomplete="off" spellcheck="false"
+                                               placeholder="@(HasKey(provider.Id) ? "••••••••" : L["ApiKeyPlaceholder"])"
+                                               value="@KeyDraft(provider.Id)" @oninput="e => _keyDrafts[provider.Id] = Text(e)" />
+                                    </label>
+                                    <button type="button" class="ai-button" disabled="@string.IsNullOrWhiteSpace(KeyDraft(provider.Id))" @onclick="() => SaveKeyAsync(provider)">@L["SaveKey"]</button>
+                                    @if (HasKey(provider.Id))
+                                    {
+                                        <button type="button" class="ai-button ghost" @onclick="() => DeleteKeyAsync(provider)">@L["DeleteKey"]</button>
+                                    }
+                                </div>
+                            }
+                            <label class="ai-field">
+                                <span>@L["Models"]</span>
+                                <textarea rows="3" spellcheck="false" placeholder="@L["ModelsPlaceholder"]"
+                                          @onchange="e => UpdateProviderAsync(provider with { Models = Lines(Text(e)) })">@string.Join("\n", provider.Models ?? [])</textarea>
+                            </label>
+                            <div class="ai-field-row">
+                                <button type="button" class="ai-button ghost" disabled="@(!provider.Enabled || _listing is not null)" @onclick="() => ListModelsAsync(provider)">
+                                    @(_listing == provider.Id ? L["ListingModels"] : L["ListModels"])
+                                </button>
+                                @if (!IsPreset(provider.Id))
+                                {
+                                    <button type="button" class="ai-button ghost danger" @onclick="() => RemoveProviderAsync(provider)">@L["RemoveService"]</button>
+                                }
+                            </div>
+                            @if (_listed.TryGetValue(provider.Id, out IReadOnlyList<ModelInfo>? listed))
+                            {
+                                <label class="ai-field">
+                                    <span>@string.Format(CultureInfo.CurrentCulture, L["ModelsFound"], listed.Count)</span>
+                                    <input list="@("ai-models-" + provider.Id)" placeholder="@L["PickModel"]" @onchange="e => AddModelAsync(provider, Text(e))" />
+                                    <datalist id="@("ai-models-" + provider.Id)">
+                                        @foreach (ModelInfo model in listed.Take(2000))
+                                        {
+                                            <option value="@model.Id">@model.Name</option>
+                                        }
+                                    </datalist>
+                                </label>
+                            }
+                        </fieldset>
+                    }
+                    <fieldset class="ai-card">
+                        <legend>@L["AddService"]</legend>
+                        <div class="ai-field-row">
+                            <label class="ai-field"><span>@L["ServiceName"]</span><input value="@_newName" @oninput="e => _newName = Text(e)" /></label>
+                            <label class="ai-field"><span>@L["BaseUrl"]</span><input type="url" value="@_newUrl" placeholder="https://…/v1" @oninput="e => _newUrl = Text(e)" /></label>
+                            <button type="button" class="ai-button" disabled="@(string.IsNullOrWhiteSpace(_newName) || string.IsNullOrWhiteSpace(_newUrl))" @onclick="AddProviderAsync">@L["Add"]</button>
+                        </div>
+                    </fieldset>
+                    break;
+
+                case SettingsTab.Local:
+                    <p class="ai-muted">@L["LocalHelp"]</p>
+                    @if (Gpu is { } gpu)
+                    {
+                        <p class="@(gpu.WebGpu ? null : "ai-error-text")">
+                            @(gpu.WebGpu ? string.Format(CultureInfo.CurrentCulture, L["GpuFound"], gpu.Adapter) : L["GpuMissing"] + (gpu.Error is null ? null : " (" + gpu.Error + ")"))
+                        </p>
+                    }
+                    <label class="ai-switch">
+                        <input type="checkbox" checked="@(Settings.FindProvider(ProviderSettings.LocalId)?.Enabled == true)"
+                               @onchange="e => UpdateProviderAsync((Settings.FindProvider(ProviderSettings.LocalId) ?? ProviderPresets.Local) with { Enabled = IsChecked(e) })" />
+                        <span>@L["LocalEnabled"]</span>
+                    </label>
+                    <label class="ai-field">
+                        <span>@L["LocalModel"]</span>
+                        <select value="@Settings.LocalModel" @onchange="e => ApplyAsync(Settings with { LocalModel = Text(e) })">
+                            @if (_localModels.All(m => m.Id != Settings.LocalModel))
+                            {
+                                <option value="@Settings.LocalModel">@Settings.LocalModel</option>
+                            }
+                            @foreach (LocalModelInfo model in _localModels)
+                            {
+                                <option value="@model.Id">@model.Id · @((model.VramMb / 1024.0).ToString("0.0", CultureInfo.CurrentCulture)) GB@(model.LowResource ? " · " + L["LowResource"] : null)</option>
+                            }
+                        </select>
+                    </label>
+                    <p class="ai-muted">
+                        @(Local.LoadedModel is { } loaded ? string.Format(CultureInfo.CurrentCulture, L["LocalLoaded"], loaded) : L["LocalNotLoaded"])
+                        @(_localCached ? " · " + L["LocalCached"] : null)
+                    </p>
+                    @if (LocalProgress is { } progress)
+                    {
+                        <progress max="1" value="@progress.ToString(CultureInfo.InvariantCulture)"></progress>
+                        <p class="ai-muted">@LocalProgressText</p>
+                    }
+                    else if (!string.IsNullOrEmpty(_localError))
+                    {
+                        <p class="ai-error-text">@_localError</p>
+                    }
+                    <div class="ai-field-row">
+                        <button type="button" class="ai-button" disabled="@(Gpu is { WebGpu: false } || _localBusy)" @onclick="LoadLocalAsync">@L["LocalLoad"]</button>
+                        <button type="button" class="ai-button ghost" disabled="@(Local.LoadedModel is null || _localBusy)" @onclick="UnloadLocalAsync">@L["LocalUnload"]</button>
+                        <button type="button" class="ai-button ghost danger" disabled="@(!_localCached || _localBusy)" @onclick="DeleteLocalAsync">@L["LocalDelete"]</button>
+                    </div>
+                    <label class="ai-check">
+                        <input type="checkbox" checked="@Settings.AutoLoadLocal" @onchange="e => ApplyAsync(Settings with { AutoLoadLocal = IsChecked(e) })" />
+                        <span>@L["AutoLoadLocal"]</span>
+                    </label>
+                    <label class="ai-check">
+                        <input type="checkbox" checked="@Settings.PreferLocalWithoutKey" @onchange="e => ApplyAsync(Settings with { PreferLocalWithoutKey = IsChecked(e) })" />
+                        <span>@L["PreferLocal"]</span>
+                    </label>
+                    break;
+
+                case SettingsTab.Chat:
+                    <fieldset class="ai-card">
+                        <legend>@L["Mode"]</legend>
+                        <label class="ai-check"><input type="radio" name="ai-mode" checked="@(Settings.Mode == ChatMode.Single)" @onchange="() => ApplyAsync(Settings with { Mode = ChatMode.Single })" /><span>@L["ModeSingle"]</span></label>
+                        <label class="ai-check"><input type="radio" name="ai-mode" checked="@(Settings.Mode == ChatMode.Race)" @onchange="() => ApplyAsync(Settings with { Mode = ChatMode.Race })" /><span>@L["ModeRace"]</span></label>
+                        <label class="ai-field">
+                            <span>@L["RaceModels"]</span>
+                            <textarea rows="4" spellcheck="false" @onchange="e => ApplyAsync(Settings with { RaceModels = Lines(Text(e)) })">@string.Join("\n", Settings.RaceModels)</textarea>
+                        </label>
+                        <label class="ai-field ai-narrow">
+                            <span>@L["RaceMinDelta"]</span>
+                            <input type="number" min="0" max="50" step="1" value="@Settings.RaceMinDelta.ToString(CultureInfo.InvariantCulture)"
+                                   @onchange="e => ApplyAsync(Settings with { RaceMinDelta = Number(e, Settings.RaceMinDelta) })" />
+                        </label>
+                    </fieldset>
+                    <fieldset class="ai-card">
+                        <legend>@L["AutoTune"]</legend>
+                        <label class="ai-field ai-narrow">
+                            <span>@L["Strategy"]</span>
+                            <select value="@Settings.Strategy.ToString()" @onchange="e => ApplyAsync(Settings with { Strategy = Enum.Parse<AutoTuneStrategy>(Text(e)) })">
+                                @foreach (AutoTuneStrategy strategy in Enum.GetValues<AutoTuneStrategy>())
+                                {
+                                    <option value="@strategy.ToString()">@L["Strategy_" + strategy.ToString()]</option>
+                                }
+                            </select>
+                        </label>
+                        @if (Settings.Strategy == AutoTuneStrategy.Manual)
+                        {
+                            <div class="ai-params-grid">
+                                @foreach (string name in SamplingParameters.Names)
+                                {
+                                    <label class="ai-field">
+                                        <span>@name</span>
+                                        <input type="number" step="0.05" value="@Settings.ManualParams.Get(name).ToString(CultureInfo.InvariantCulture)"
+                                               @onchange="e => ApplyAsync(Settings with { ManualParams = Settings.ManualParams.With(name, Number(e, Settings.ManualParams.Get(name))).Clamp() })" />
+                                    </label>
+                                }
+                            </div>
+                        }
+                        <label class="ai-check">
+                            <input type="checkbox" checked="@Settings.LearnFromFeedback" @onchange="e => ApplyAsync(Settings with { LearnFromFeedback = IsChecked(e) })" />
+                            <span>@L["LearnFromFeedback"]</span>
+                        </label>
+                        <p class="ai-muted">@string.Format(CultureInfo.CurrentCulture, L["FeedbackCount"], Session.Feedback.History.Count)</p>
+                        <button type="button" class="ai-button ghost" disabled="@(Session.Feedback.History.Count == 0)" @onclick="() => Session.ResetFeedbackAsync()">@L["ResetFeedback"]</button>
+                        <label class="ai-field ai-narrow">
+                            <span>@L["MaxTokens"]</span>
+                            <input type="number" min="0" max="200000" step="256" value="@Settings.MaxTokens.ToString(CultureInfo.InvariantCulture)"
+                                   @onchange="e => ApplyAsync(Settings with { MaxTokens = (int)Number(e, Settings.MaxTokens) })" />
+                        </label>
+                    </fieldset>
+                    <fieldset class="ai-card">
+                        <legend>@L["Persona"]</legend>
+                        <label class="ai-field ai-narrow">
+                            <span>@L["DefaultPersona"]</span>
+                            <select value="@Settings.PersonaId" @onchange="e => ApplyAsync(Settings with { PersonaId = Text(e) })">
+                                @foreach (Persona persona in Settings.AllPersonas)
+                                {
+                                    <option value="@persona.Id">@persona.Emoji @persona.Name</option>
+                                }
+                            </select>
+                        </label>
+                        @foreach (Persona persona in Settings.CustomPersonas)
+                        {
+                            <div class="ai-persona-row" @key="persona.Id">
+                                <span>@persona.Emoji @persona.Name</span>
+                                <button type="button" class="ai-button ghost danger" @onclick="() => RemovePersonaAsync(persona)">@L["Remove"]</button>
+                            </div>
+                        }
+                        <div class="ai-field-row">
+                            <label class="ai-field ai-tiny"><span>@L["Emoji"]</span><input maxlength="4" value="@_personaEmoji" @oninput="e => _personaEmoji = Text(e)" /></label>
+                            <label class="ai-field"><span>@L["PersonaName"]</span><input value="@_personaName" @oninput="e => _personaName = Text(e)" /></label>
+                        </div>
+                        <label class="ai-field">
+                            <span>@L["SystemPrompt"]</span>
+                            <textarea rows="3" value="@_personaPrompt" @oninput="e => _personaPrompt = Text(e)"></textarea>
+                        </label>
+                        <button type="button" class="ai-button" disabled="@string.IsNullOrWhiteSpace(_personaName)" @onclick="AddPersonaAsync">@L["AddPersona"]</button>
+                    </fieldset>
+                    break;
+
+                case SettingsTab.Modules:
+                    <p class="ai-muted">@L["ModulesHelp"]</p>
+                    @foreach (string error in Session.ModuleErrors)
+                    {
+                        <p class="ai-error-text">@error</p>
+                    }
+                    <ul class="ai-module-list">
+                        @foreach (IChatModule module in Session.Modules.Modules)
+                        {
+                            string origin = Session.Modules.OriginOf(module.Id) ?? string.Empty;
+                            <li @key="module.Id">
+                                <label class="ai-switch">
+                                    <input type="checkbox" checked="@Settings.EnabledModules.Contains(module.Id)" @onchange="e => ToggleModuleAsync(module.Id, IsChecked(e))" />
+                                    <span><strong>@module.Name</strong> <span class="ai-muted">@module.Id · v@module.Version · @L["Origin_" + origin]</span></span>
+                                </label>
+                                <p class="ai-muted">@module.Description</p>
+                                @if (origin == DeclarativeModule.Origin)
+                                {
+                                    <button type="button" class="ai-button ghost danger" @onclick="() => Session.DeleteModuleAsync(module.Id)">@L["Remove"]</button>
+                                }
+                            </li>
+                        }
+                    </ul>
+                    <div class="ai-field-row">
+                        <button type="button" class="ai-button" @onclick="OnImportModule">@L["ImportModule"]</button>
+                        <button type="button" class="ai-button ghost" @onclick="() => Session.ReloadModulesAsync()">@L["ReloadModules"]</button>
+                    </div>
+                    break;
+
+                case SettingsTab.Data:
+                    <p class="ai-muted">@L["DataHelp"]</p>
+                    <div class="ai-field-row">
+                        <button type="button" class="ai-button" @onclick="OnExport">@L["Export"]</button>
+                        <button type="button" class="ai-button ghost" @onclick="OnImport">@L["Import"]</button>
+                    </div>
+                    break;
+            }
+        </div>
+    </div>
+</div>

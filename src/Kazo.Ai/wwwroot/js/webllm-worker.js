@@ -1,4 +1,4 @@
-// Kazo IA: the Web Worker that runs the local model (WebLLM over WebGPU), so the window stays
+// Kazo AI: the Web Worker that runs the local model (WebLLM over WebGPU), so the window stays
 // responsive while the model loads and writes. WebLLM (Apache-2.0) is vendored in ../lib/web-llm/.
 import { WebWorkerMLCEngineHandler } from '../lib/web-llm/web-llm.js';
 

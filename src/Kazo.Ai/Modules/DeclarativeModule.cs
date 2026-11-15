@@ -72,6 +72,9 @@ public sealed class DeclarativeReplacement
 /// <summary>A <see cref="DeclarativeModuleDefinition"/> turned into a module.</summary>
 public sealed class DeclarativeModule : IChatModule
 {
+    /// <summary>The origin of the modules read from the modules folder (<see cref="ModuleRegistry.Register"/>).</summary>
+    public const string Origin = "file";
+
     /// <summary>The time a replacement may take on one answer (a bad pattern must not freeze the app).</summary>
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(250);
 

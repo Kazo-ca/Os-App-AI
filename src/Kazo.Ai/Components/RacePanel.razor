@@ -1,0 +1,47 @@
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+
+@* The race while it runs: each model, how far it got, its score once done, and the leader. *@
+<section class="ai-race" aria-label="@L["Race"]">
+    <header>
+        <span class="ai-race-title">@L["Race"]</span>
+        <span class="ai-muted">@string.Format(CultureInfo.CurrentCulture, L["RaceProgress"], Session.RaceResults.Count, Session.RaceTotal)</span>
+    </header>
+    <ul>
+        @foreach (string model in Session.Settings.RaceModels)
+        {
+            RaceModelResult? result = Session.RaceResults.FirstOrDefault(r => r.Model == model);
+            int length = Session.RaceText.TryGetValue(model, out string? text) ? text.Length : 0;
+            bool leader = Session.RaceLeader?.Model == model;
+            <li class="@(leader ? "leader" : null) @(result is { Success: false } ? "failed" : null)" @key="model">
+                <span class="ai-race-model">@(leader ? "★ " : null)@ModelLabel(model)</span>
+                @if (result is null)
+                {
+                    <span class="ai-muted">@string.Format(CultureInfo.CurrentCulture, L["RaceChars"], length)</span>
+                }
+                else if (result.Success)
+                {
+                    <span>@result.Score.ToString("0", CultureInfo.InvariantCulture) · @result.DurationMs.ToString(CultureInfo.CurrentCulture) ms</span>
+                }
+                else
+                {
+                    <span class="ai-error-text">@result.Error</span>
+                }
+            </li>
+        }
+    </ul>
+</section>
+
+@code {
+    /// <summary>Gets or sets the chat.</summary>
+    [Parameter, EditorRequired]
+    public ChatSession Session { get; set; } = default!;
+
+    /// <summary>Gets or sets the app's texts.</summary>
+    [Parameter, EditorRequired]
+    public IStringLocalizer L { get; set; } = default!;
+
+    /// <summary>Gets or sets how a model is named.</summary>
+    [Parameter, EditorRequired]
+    public Func<string?, string> ModelLabel { get; set; } = default!;
+}

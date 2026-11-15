@@ -46,7 +46,7 @@ public sealed class BrowserStreamingHttp : IStreamingHttp, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(request);
         if (!_context.GrantedCapabilities.Contains(AppCapabilities.NetworkRealAccess))
         {
-            throw new AiServiceException(AiErrorKind.NotAllowed, "Kazo IA may not reach the Internet: the network.real.access permission was refused.");
+            throw new AiServiceException(AiErrorKind.NotAllowed, "Kazo AI may not reach the Internet: the network.real.access permission was refused.");
         }
 
         _module ??= await _js.InvokeAsync<IJSObjectReference>("import", cancellationToken, ModulePath);

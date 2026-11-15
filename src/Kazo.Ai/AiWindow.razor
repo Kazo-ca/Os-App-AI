@@ -1,0 +1,176 @@
+@inherits WindowAppBase
+
+@* The Kazo AI window. Wide: the conversations on the left, the open conversation on the right.
+   Narrow (a phone): the conversation alone, the list as a side panel opened from the toolbar.
+   The CSS decides which layout applies, from the window's own width (container query). *@
+<div class="ai-window" aria-label="@L["AppLabel"]">
+    @if (_session is null)
+    {
+        <div class="ai-loading" role="status">@L["Loading"]</div>
+    }
+    else
+    {
+        <div class="ai-frame">
+            <aside id="ai-sidebar" class="ai-sidebar @(_sidebarOpen ? "open" : null)" aria-label="@L["Conversations"]">
+                <div class="ai-sidebar-head">
+                    <span class="ai-brand" aria-hidden="true">✦</span>
+                    <span class="ai-brand-name">@L["AppName"]</span>
+                    <button type="button" class="ai-icon-button ai-panel-close" aria-label="@L["ClosePanel"]" @onclick="() => _sidebarOpen = false">×</button>
+                </div>
+                <button type="button" class="ai-new" disabled="@Busy" @onclick="NewConversationAsync">
+                    <span aria-hidden="true">＋</span> @L["NewConversation"]
+                </button>
+                <nav class="ai-conversations">
+                    @if (Session.Conversations.Count == 0)
+                    {
+                        <p class="ai-muted ai-empty-list">@L["NoConversations"]</p>
+                    }
+                    @foreach (Conversation conversation in Session.Conversations)
+                    {
+                        <div class="ai-conversation @(conversation.Id == Current?.Id ? "selected" : null)" @key="conversation.Id">
+                            <button type="button" class="ai-conversation-open" disabled="@Busy"
+                                    aria-current="@(conversation.Id == Current?.Id ? "true" : null)"
+                                    title="@conversation.Title"
+                                    @onclick="() => SelectAsync(conversation.Id)">
+                                <span class="ai-conversation-title">@(string.IsNullOrEmpty(conversation.Title) ? L["Untitled"] : conversation.Title)</span>
+                                <span class="ai-conversation-date">@conversation.UpdatedAt.ToLocalTime().ToString("g", System.Globalization.CultureInfo.CurrentCulture)</span>
+                            </button>
+                            <button type="button" class="ai-icon-button" aria-label="@L["RenameConversation"]" title="@L["RenameConversation"]" @onclick="() => RenameConversationAsync(conversation)">✎</button>
+                            <button type="button" class="ai-icon-button" aria-label="@L["DeleteConversation"]" title="@L["DeleteConversation"]" disabled="@(Busy && conversation.Id == Current?.Id)" @onclick="() => DeleteConversationAsync(conversation)">🗑</button>
+                        </div>
+                    }
+                </nav>
+                <button type="button" class="ai-settings-button" @onclick="() => _settingsOpen = true">
+                    <span aria-hidden="true">⚙</span> @L["Settings"]
+                </button>
+            </aside>
+
+            <main class="ai-main">
+                <header class="ai-toolbar">
+                    <button type="button" class="ai-icon-button ai-sidebar-toggle" aria-controls="ai-sidebar"
+                            aria-expanded="@(_sidebarOpen ? "true" : "false")" aria-label="@L["Conversations"]"
+                            @onclick="() => _sidebarOpen = !_sidebarOpen">☰</button>
+                    <h1 class="ai-title">@(Current?.Title is { Length: > 0 } title ? title : L["NewConversation"])</h1>
+                    <label class="ai-model">
+                        <span class="ai-sr-only">@L["Model"]</span>
+                        <select value="@SelectedChoice" disabled="@Busy" @onchange="SelectModelAsync">
+                            @foreach ((string value, string label) in ModelChoices())
+                            {
+                                <option value="@value">@label</option>
+                            }
+                        </select>
+                    </label>
+                    <span class="ai-persona" title="@L["Persona"]">@Session.Settings.FindPersona(Current?.PersonaId ?? Session.Settings.PersonaId).Emoji</span>
+                </header>
+
+                @if (!HasNetwork)
+                {
+                    <p class="ai-banner">@L["NoNetwork"]</p>
+                }
+                @if (_localProgress is { } progress)
+                {
+                    <div class="ai-banner ai-local-progress" role="status">
+                        <span>@L["LocalLoading"] @((progress * 100).ToString("0", System.Globalization.CultureInfo.CurrentCulture)) %</span>
+                        <progress max="1" value="@progress.ToString(System.Globalization.CultureInfo.InvariantCulture)"></progress>
+                        <span class="ai-muted">@_localProgressText</span>
+                    </div>
+                }
+
+                <section class="ai-messages" @ref="_messages" aria-live="polite">
+                    @if (Current is null || Current.Messages.Count == 0)
+                    {
+                        <div class="ai-welcome">
+                            <div class="ai-welcome-mark" aria-hidden="true">✦</div>
+                            <h2>@L["WelcomeTitle"]</h2>
+                            <p>@L["WelcomeText"]</p>
+                            <ul class="ai-welcome-hints">
+                                <li>@L["HintKeys"]</li>
+                                <li>@L["HintLocal"]</li>
+                                <li>@L["HintRace"]</li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        @for (int index = 0; index < Current.Messages.Count; index++)
+                        {
+                            ConversationMessage message = Current.Messages[index];
+                            bool last = index == Current.Messages.Count - 1;
+                            <MessageView @key="message.Id" Message="message" L="L"
+                                         ModelLabel="ModelLabel(message.Model)"
+                                         ErrorText="@(message.Error is null ? null : ErrorText(message))"
+                                         Duration="Duration(message.DurationMs)"
+                                         CanRegenerate="@(last && !Busy && message.Role == ChatRole.Assistant)"
+                                         OnCopy="() => CopyAsync(message)"
+                                         OnRate="rating => RateAsync(message, rating)"
+                                         OnRegenerate="RegenerateAsync" />
+                        }
+                    }
+
+                    @if (Busy)
+                    {
+                        <div class="ai-pending">
+                            @if (Session.RaceTotal > 0)
+                            {
+                                <RacePanel Session="Session" L="L" ModelLabel="ModelLabel" />
+                            }
+                            <article class="ai-message assistant pending">
+                                <header class="ai-message-meta">
+                                    <span class="ai-avatar" aria-hidden="true">✦</span>
+                                    <span>@(Session.PendingModel is { } pendingModel ? ModelLabel(pendingModel) : L["Thinking"])</span>
+                                    @if (Session.PendingTune is { } tune)
+                                    {
+                                        <span class="ai-chip" title="@tune.Reasoning">@L["Context_" + tune.DetectedContext.ToString()] · T @tune.Params.Temperature.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                    }
+                                </header>
+                                @if (Session.PendingText.Length == 0)
+                                {
+                                    <div class="ai-typing" aria-label="@L["Thinking"]"><span></span><span></span><span></span></div>
+                                }
+                                else
+                                {
+                                    <div class="ai-markdown">@((MarkupString)Kazo.Ai.Markdown.MarkdownRenderer.ToHtml(Session.PendingText))</div>
+                                }
+                            </article>
+                        </div>
+                    }
+                </section>
+
+                @if (_status is not null)
+                {
+                    <p class="ai-status @(_statusIsError ? "error" : null)" role="status">
+                        <span>@_status</span>
+                        <button type="button" class="ai-icon-button" aria-label="@L["Dismiss"]" @onclick="ClearStatus">×</button>
+                    </p>
+                }
+
+                <footer class="ai-composer">
+                    <textarea @ref="_inputBox" rows="2" placeholder="@L["InputPlaceholder"]" aria-label="@L["InputPlaceholder"]"
+                              @bind="_input" @bind:event="oninput" @onkeydown="OnInputKeyDown"></textarea>
+                    @if (Busy)
+                    {
+                        <button type="button" class="ai-send stop" @onclick="Stop">
+                            <span aria-hidden="true">■</span> @L["Stop"]
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="ai-send" disabled="@string.IsNullOrWhiteSpace(_input)" @onclick="SendAsync">
+                            <span aria-hidden="true">➤</span> @L["Send"]
+                        </button>
+                    }
+                </footer>
+            </main>
+        </div>
+
+        @if (_settingsOpen)
+        {
+            <SettingsPanel Session="Session" L="L" Keys="_keys!" Local="_local!" Gpu="_gpu"
+                           LocalProgress="_localProgress" LocalProgressText="_localProgressText"
+                           OnChanged="OnSettingsChangedAsync"
+                           OnExport="ExportSettingsAsync" OnImport="ImportSettingsAsync"
+                           OnImportModule="ImportModuleAsync"
+                           OnClose="() => _settingsOpen = false" />
+        }
+    }
+</div>

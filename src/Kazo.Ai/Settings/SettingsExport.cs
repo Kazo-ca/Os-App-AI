@@ -60,7 +60,7 @@ public sealed record SettingsExport
 
         if (export is null || export.Format != FormatName)
         {
-            throw new FormatException($"The file is not a Kazo IA settings export (\"format\": \"{FormatName}\").");
+            throw new FormatException($"The file is not a Kazo AI settings export (\"format\": \"{FormatName}\").");
         }
 
         var modules = export.Modules
