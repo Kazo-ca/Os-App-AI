@@ -47,6 +47,15 @@ your own API keys, or run a model directly in your browser: nothing to install, 
 Kazo AI asks for access to the **real network** (`network.real.access`) to reach the AI services
 and to download the local model. Kazo OS asks an administrator to approve it at the first launch.
 
+## Screenshots
+
+<p>
+  <img src="store/screenshots/01-chat.png" alt="Kazo AI, screenshot 1" height="240">
+  <img src="store/screenshots/02-race.png" alt="Kazo AI, screenshot 2" height="240">
+  <img src="store/screenshots/03-settings.png" alt="Kazo AI, screenshot 3" height="240">
+  <img src="store/screenshots/04-narrow.png" alt="Kazo AI, screenshot 4" height="240">
+</p>
+
 <!-- /Store listing -->
 
 ## Try it

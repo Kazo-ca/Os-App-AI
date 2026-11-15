@@ -305,7 +305,11 @@ public sealed partial class AiWindow : IAsyncDisposable
     private async Task OnSettingsChangedAsync(AiSettings settings)
     {
         string previousLocal = Session.Settings.LocalModel;
-        await Session.UpdateSettingsAsync(settings);
+        if (!await TrySaveSettingsAsync(settings))
+        {
+            return;
+        }
+
         if (previousLocal != settings.LocalModel && _local?.LoadedModel is not null)
         {
             await _local.UnloadAsync();
@@ -317,13 +321,29 @@ public sealed partial class AiWindow : IAsyncDisposable
         string value = e.Value?.ToString() ?? string.Empty;
         if (value == RaceOption)
         {
-            await Session.UpdateSettingsAsync(Session.Settings with { Mode = ChatMode.Race });
+            await TrySaveSettingsAsync(Session.Settings with { Mode = ChatMode.Race });
             return;
         }
 
         if (ModelRef.TryParse(value, out _))
         {
-            await Session.UpdateSettingsAsync(Session.Settings with { Mode = ChatMode.Single, SelectedModel = value });
+            await TrySaveSettingsAsync(Session.Settings with { Mode = ChatMode.Single, SelectedModel = value });
+        }
+    }
+
+    // A settings save that fails (storage full, a conflicting write that retried and failed
+    // again) is shown on the status line instead of taking the window down.
+    private async Task<bool> TrySaveSettingsAsync(AiSettings settings)
+    {
+        try
+        {
+            await Session.UpdateSettingsAsync(settings);
+            return true;
+        }
+        catch (IOException exception)
+        {
+            ShowStatus(exception.Message, error: true);
+            return false;
         }
     }
 

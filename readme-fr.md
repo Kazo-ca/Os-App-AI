@@ -51,6 +51,15 @@ Kazo IA demande l'accès au **réseau réel** (`network.real.access`) pour joind
 et télécharger le modèle local. Kazo OS demande à un administrateur de l'approuver au premier
 lancement.
 
+## Captures d'écran
+
+<p>
+  <img src="store/screenshots/01-chat.png" alt="Kazo IA, capture 1" height="240">
+  <img src="store/screenshots/02-race.png" alt="Kazo IA, capture 2" height="240">
+  <img src="store/screenshots/03-settings.png" alt="Kazo IA, capture 3" height="240">
+  <img src="store/screenshots/04-narrow.png" alt="Kazo IA, capture 4" height="240">
+</p>
+
 <!-- /Fiche du Store -->
 
 ## Essayer

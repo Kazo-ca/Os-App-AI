@@ -46,6 +46,11 @@ public sealed class KazoAiFileSystem : IAiFileSystem
     private readonly IAppExecutionContext _context;
     private readonly HashSet<string> _knownFolders = new(StringComparer.Ordinal);
 
+    // The OS file system refuses a write that races another write of the same file
+    // (KazoFileConflictException): the settings can be saved twice in a row by two quick changes, so
+    // the writes and deletes of the app go one at a time.
+    private readonly SemaphoreSlim _writes = new(1, 1);
+
     /// <summary>Creates the file system of the app.</summary>
     /// <param name="context">The app's context, entered for every call (calls come from child components and background tasks).</param>
     public KazoAiFileSystem(IAppExecutionContext context)
@@ -64,13 +69,29 @@ public sealed class KazoAiFileSystem : IAiFileSystem
     /// <inheritdoc />
     public async Task WriteAllTextAsync(string path, string text, CancellationToken cancellationToken)
     {
-        using IDisposable scope = KazoExecutionContext.Enter(_context);
-        if (KazoPath.GetDirectoryName(path) is { Length: > 0 } folder)
+        await _writes.WaitAsync(cancellationToken);
+        try
         {
-            await EnsureFolderAsync(folder, cancellationToken);
-        }
+            using IDisposable scope = KazoExecutionContext.Enter(_context);
+            if (KazoPath.GetDirectoryName(path) is { Length: > 0 } folder)
+            {
+                await EnsureFolderAsync(folder, cancellationToken);
+            }
 
-        await KazoFile.WriteAllTextAsync(path, text, cancellationToken);
+            try
+            {
+                await KazoFile.WriteAllTextAsync(path, text, cancellationToken);
+            }
+            catch (KazoFileConflictException)
+            {
+                // Another window of the same user wrote the file meanwhile: the last write wins.
+                await KazoFile.WriteAllTextAsync(path, text, cancellationToken);
+            }
+        }
+        finally
+        {
+            _writes.Release();
+        }
     }
 
     /// <inheritdoc />
@@ -89,10 +110,18 @@ public sealed class KazoAiFileSystem : IAiFileSystem
     /// <inheritdoc />
     public async Task DeleteAsync(string path, CancellationToken cancellationToken)
     {
-        using IDisposable scope = KazoExecutionContext.Enter(_context);
-        if (await KazoFile.ExistsAsync(path, cancellationToken))
+        await _writes.WaitAsync(cancellationToken);
+        try
         {
-            await KazoFile.DeleteAsync(path, cancellationToken);
+            using IDisposable scope = KazoExecutionContext.Enter(_context);
+            if (await KazoFile.ExistsAsync(path, cancellationToken))
+            {
+                await KazoFile.DeleteAsync(path, cancellationToken);
+            }
+        }
+        finally
+        {
+            _writes.Release();
         }
     }
 

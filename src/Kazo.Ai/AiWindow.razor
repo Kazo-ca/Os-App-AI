@@ -97,9 +97,9 @@
                             ConversationMessage message = Current.Messages[index];
                             bool last = index == Current.Messages.Count - 1;
                             <MessageView @key="message.Id" Message="message" L="L"
-                                         ModelLabel="ModelLabel(message.Model)"
+                                         ModelLabel="@ModelLabel(message.Model)"
                                          ErrorText="@(message.Error is null ? null : ErrorText(message))"
-                                         Duration="Duration(message.DurationMs)"
+                                         Duration="@Duration(message.DurationMs)"
                                          CanRegenerate="@(last && !Busy && message.Role == ChatRole.Assistant)"
                                          OnCopy="() => CopyAsync(message)"
                                          OnRate="rating => RateAsync(message, rating)"

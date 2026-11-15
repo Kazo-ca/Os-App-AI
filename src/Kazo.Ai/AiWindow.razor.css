@@ -501,6 +501,16 @@
 .ai-window ::deep .ai-markdown h2 { font-size: 1.2em; }
 .ai-window ::deep .ai-markdown h3 { font-size: 1.05em; }
 
+.ai-window ::deep .ai-markdown ul,
+.ai-window ::deep .ai-markdown ol {
+    margin: 0.4em 0;
+    padding-left: 1.5em;
+}
+
+.ai-window ::deep .ai-markdown li + li {
+    margin-top: 0.15em;
+}
+
 .ai-window ::deep .ai-markdown code {
     padding: 1px 5px;
     border-radius: 5px;
