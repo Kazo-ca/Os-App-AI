@@ -19,7 +19,7 @@ public sealed class TemplateSolutionApp : AppDefinition
     /// The app's version. A tag v&lt;version&gt; publishes it to the Kazo OS Store
     /// (.github/workflows/publish-to-kazoos-store.yml): change it here, then tag.
     /// </summary>
-    public override string Version => "1.0.0";
+    public override string Version => "1.0.1";
 
     /// <inheritdoc />
     public override AppKind Kind => AppKind.Window;
