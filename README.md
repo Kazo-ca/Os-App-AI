@@ -50,10 +50,10 @@ and to download the local model. Kazo OS asks an administrator to approve it at 
 ## Screenshots
 
 <p>
-  <img src="store/screenshots/01-chat.png" alt="Kazo AI, screenshot 1" height="240">
-  <img src="store/screenshots/02-race.png" alt="Kazo AI, screenshot 2" height="240">
-  <img src="store/screenshots/03-settings.png" alt="Kazo AI, screenshot 3" height="240">
-  <img src="store/screenshots/04-narrow.png" alt="Kazo AI, screenshot 4" height="240">
+  <img src="store/screenshots/1.png" alt="Kazo AI, screenshot 1" height="240">
+  <img src="store/screenshots/2.png" alt="Kazo AI, screenshot 2" height="240">
+  <img src="store/screenshots/3.png" alt="Kazo AI, screenshot 3" height="240">
+  <img src="store/screenshots/4.png" alt="Kazo AI, screenshot 4" height="240">
 </p>
 
 <!-- /Store listing -->

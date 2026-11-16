@@ -54,10 +54,10 @@ lancement.
 ## Captures d'écran
 
 <p>
-  <img src="store/screenshots/01-chat.png" alt="Kazo IA, capture 1" height="240">
-  <img src="store/screenshots/02-race.png" alt="Kazo IA, capture 2" height="240">
-  <img src="store/screenshots/03-settings.png" alt="Kazo IA, capture 3" height="240">
-  <img src="store/screenshots/04-narrow.png" alt="Kazo IA, capture 4" height="240">
+  <img src="store/screenshots/1.png" alt="Kazo IA, capture 1" height="240">
+  <img src="store/screenshots/2.png" alt="Kazo IA, capture 2" height="240">
+  <img src="store/screenshots/3.png" alt="Kazo IA, capture 3" height="240">
+  <img src="store/screenshots/4.png" alt="Kazo IA, capture 4" height="240">
 </p>
 
 <!-- /Fiche du Store -->
