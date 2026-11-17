@@ -41,7 +41,7 @@ public sealed class AiApp : AppDefinition
 
     /// <inheritdoc />
     /// <remarks>The tag that publishes to the Kazo OS Store must be v + this version.</remarks>
-    public override string Version => "0.1.2";
+    public override string Version => "0.1.3";
 
     /// <inheritdoc />
     /// <remarks>One window per user holds every conversation; launching the app again brings it back.</remarks>
