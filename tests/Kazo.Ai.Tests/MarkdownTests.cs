@@ -48,6 +48,16 @@ public sealed class MarkdownTests
     }
 
     [Fact]
+    public void Several_code_spans_and_links_on_one_line_keep_the_text_between_them()
+    {
+        string html = MarkdownRenderer.ToHtml("a `x<y` b [one](https://a.b) c `z` d [two](https://c.d) e");
+
+        Assert.Equal(
+            "<p>a <code>x&lt;y</code> b <a href=\"https://a.b/\" target=\"_blank\" rel=\"noopener noreferrer\">one</a> c <code>z</code> d <a href=\"https://c.d/\" target=\"_blank\" rel=\"noopener noreferrer\">two</a> e</p>",
+            html);
+    }
+
+    [Fact]
     public void Headings_lists_quotes_and_tables_are_rendered()
     {
         string html = MarkdownRenderer.ToHtml("# Title\n\n- one\n- two\n\n1. first\n2. second\n\n> quoted\n\n| a | b |\n|---|---|\n| 1 | 2 |");

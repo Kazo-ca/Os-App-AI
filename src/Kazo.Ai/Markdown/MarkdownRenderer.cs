@@ -130,14 +130,14 @@ public static partial class MarkdownRenderer
         // Inline code first, so nothing inside it is touched: each span is replaced by a marker
         // that cannot appear in the encoded text, then put back at the end.
         var codes = new List<string>();
-        string withMarkers = CodeSpanPattern().Replace(text, match =>
+        string withMarkers = ReplaceEach(CodeSpanPattern(), text, match =>
         {
             codes.Add("<code>" + WebUtility.HtmlEncode(match.Groups[1].Value) + "</code>");
             return "\u0001" + (codes.Count - 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + "\u0002";
         });
 
         string html = WebUtility.HtmlEncode(withMarkers);
-        html = LinkPattern().Replace(html, match =>
+        html = ReplaceEach(LinkPattern(), html, match =>
         {
             string url = WebUtility.HtmlDecode(match.Groups[2].Value);
             return Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp)
@@ -147,10 +147,38 @@ public static partial class MarkdownRenderer
         html = BoldPattern().Replace(html, "<strong>$2</strong>");
         html = ItalicPattern().Replace(html, "<em>$2</em>");
         html = StrikePattern().Replace(html, "<del>$1</del>");
-        return CodeMarkerPattern().Replace(html, match =>
+        return ReplaceEach(CodeMarkerPattern(), html, match =>
             int.TryParse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture, out int index) && index < codes.Count
                 ? codes[index]
                 : string.Empty);
+    }
+
+    /// <summary>
+    /// Replaces each match of <paramref name="pattern"/> by what <paramref name="replace"/> returns.
+    /// </summary>
+    /// <remarks>
+    /// Same result as <c>Regex.Replace(string, MatchEvaluator)</c>, which the trimmed framework of
+    /// Kazo OS does not keep: the Store refuses an app that calls it (ADR 0242 of Kazo OS).
+    /// </remarks>
+    private static string ReplaceEach(Regex pattern, string input, Func<Match, string> replace)
+    {
+        // Regex.Matches, not Match.NextMatch() or Regex.Match(string, int): the trimmed framework
+        // keeps neither. Matches never overlap and come in order.
+        MatchCollection matches = pattern.Matches(input);
+        if (matches.Count == 0)
+        {
+            return input;
+        }
+
+        var result = new StringBuilder(input.Length);
+        int copied = 0;
+        foreach (Match match in matches)
+        {
+            result.Append(input, copied, match.Index - copied).Append(replace(match));
+            copied = match.Index + match.Length;
+        }
+
+        return result.Append(input, copied, input.Length - copied).ToString();
     }
 
     private static void Flush(StringBuilder html, List<string> paragraph)

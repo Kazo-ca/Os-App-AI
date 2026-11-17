@@ -322,9 +322,27 @@ public sealed partial class SettingsPanel
     private static IReadOnlyList<string> Lines(string text) =>
         [.. text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.Ordinal)];
 
+    /// <summary>Lower-case letters and digits of <paramref name="name"/>, each other run becoming one <c>_</c>.</summary>
+    /// <remarks>
+    /// Written without Regex: the trimmed framework of Kazo OS does not keep the static
+    /// <c>Regex.Replace</c> with a timeout, and the Store refuses an app that calls it.
+    /// </remarks>
     private static string Slug(string name)
     {
-        string slug = Regex.Replace(name.Trim().ToLowerInvariant(), "[^a-z0-9]+", "_", RegexOptions.None, TimeSpan.FromMilliseconds(100)).Trim('_');
+        var builder = new System.Text.StringBuilder(name.Length);
+        foreach (char c in name.Trim().ToLowerInvariant())
+        {
+            if (c is (>= 'a' and <= 'z') or (>= '0' and <= '9'))
+            {
+                builder.Append(c);
+            }
+            else if (builder.Length == 0 || builder[^1] != '_')
+            {
+                builder.Append('_');
+            }
+        }
+
+        string slug = builder.ToString().Trim('_');
         return slug.Length == 0 ? "service" : slug.Length > 32 ? slug[..32] : slug;
     }
 }

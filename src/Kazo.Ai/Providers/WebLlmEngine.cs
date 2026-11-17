@@ -150,9 +150,20 @@ public sealed class WebLlmEngine : ILocalModelEngine, IAsyncDisposable
     /// <param name="id">The request.</param>
     /// <param name="text">The piece.</param>
     /// <returns>A task.</returns>
+    /// <remarks>
+    /// The channel is unbounded, so <c>TryWrite</c> only fails once the answer is complete. Not
+    /// <c>WriteAsync</c>: the trimmed framework of Kazo OS does not keep it.
+    /// </remarks>
     [JSInvokable]
-    public ValueTask OnChunk(int id, string text) =>
-        _answers.TryGetValue(id, out Channel<ChatDelta>? answer) ? answer.Writer.WriteAsync(new ChatDelta(text)) : ValueTask.CompletedTask;
+    public ValueTask OnChunk(int id, string text)
+    {
+        if (_answers.TryGetValue(id, out Channel<ChatDelta>? answer))
+        {
+            answer.Writer.TryWrite(new ChatDelta(text));
+        }
+
+        return ValueTask.CompletedTask;
+    }
 
     /// <summary>The end of an answer, from the bridge.</summary>
     /// <param name="id">The request.</param>

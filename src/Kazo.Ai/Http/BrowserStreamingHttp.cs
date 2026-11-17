@@ -80,9 +80,20 @@ public sealed class BrowserStreamingHttp : IStreamingHttp, IAsyncDisposable
     /// <param name="id">The request.</param>
     /// <param name="text">The piece.</param>
     /// <returns>A task.</returns>
+    /// <remarks>
+    /// The channel is unbounded, so <c>TryWrite</c> only fails once the body is complete. Not
+    /// <c>WriteAsync</c>: the trimmed framework of Kazo OS does not keep it.
+    /// </remarks>
     [JSInvokable]
-    public ValueTask OnChunk(int id, string text) =>
-        _bodies.TryGetValue(id, out Channel<string>? body) ? body.Writer.WriteAsync(text) : ValueTask.CompletedTask;
+    public ValueTask OnChunk(int id, string text)
+    {
+        if (_bodies.TryGetValue(id, out Channel<string>? body))
+        {
+            body.Writer.TryWrite(text);
+        }
+
+        return ValueTask.CompletedTask;
+    }
 
     /// <summary>The end of a body, from <c>ai-fetch.js</c>.</summary>
     /// <param name="id">The request.</param>

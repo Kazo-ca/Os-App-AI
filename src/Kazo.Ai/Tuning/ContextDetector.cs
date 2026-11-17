@@ -74,7 +74,13 @@ public static partial class ContextDetector
             scores[ContextType.Conversational] = 0.5;
         }
 
-        double total = scores.Values.Sum();
+        // A loop, not Enumerable.Sum(IEnumerable<double>): the trimmed framework of Kazo OS does not keep it.
+        double total = 0;
+        foreach (double score in scores.Values)
+        {
+            total += score;
+        }
+
         return [.. scores
             .Select(pair => new ContextScore(pair.Key, Math.Round(pair.Value, 2), total <= 0 ? 0 : Math.Round(pair.Value / total * 100, 1)))
             .OrderByDescending(score => score.Score)

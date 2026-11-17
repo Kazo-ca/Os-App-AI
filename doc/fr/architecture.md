@@ -96,3 +96,10 @@ source), pour que l'app fonctionne encore quand l'hôte de l'OS l'élague (trimm
 Le Store compile `src/Kazo.Ai/Kazo.Ai.csproj` en Release et emballe un seul assembly
 (Kazo-ca/Os#419) : la CI vérifie que le paquet ne contient que `lib/Kazo.Ai.dll`. La fiche vient de
 `store/` ; le bloc du README en est généré avec `node .github/scripts/store-readme.mjs`.
+
+Kazo OS publié élague le framework .NET (ADR 0242 de Kazo OS) : à l'installation, l'OS refuse un
+paquet qui appelle un membre retiré. La version 0.1.1 a été refusée pour `Regex.Replace` avec un
+`MatchEvaluator` ou un délai statique, `Enumerable.Sum` sur des `double` et `ChannelWriter.WriteAsync`.
+L'app passe donc par `Regex.Matches`, `Regex.Replace(string, string)`, une boucle et `TryWrite`, et
+`TrimmedOsApiTests` empêche ces appels de revenir. Tester une nouvelle version sur une publication
+rognée de l'OS (os.kazo.ca), pas seulement sur `dotnet run`, qui garde le framework entier.

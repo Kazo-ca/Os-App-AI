@@ -93,3 +93,10 @@ working when the OS host trims it.
 The Store compiles `src/Kazo.Ai/Kazo.Ai.csproj` in Release and packs one assembly (Kazo-ca/Os#419):
 CI checks that the package holds only `lib/Kazo.Ai.dll`. The listing comes from `store/`; the README
 block is generated from it with `node .github/scripts/store-readme.mjs`.
+
+The published Kazo OS trims the .NET framework (Kazo OS ADR 0242): when installing, the OS refuses a
+package that calls a removed member. Version 0.1.1 was refused for `Regex.Replace` with a
+`MatchEvaluator` or a static timeout, `Enumerable.Sum` over `double` and `ChannelWriter.WriteAsync`.
+The app therefore uses `Regex.Matches`, `Regex.Replace(string, string)`, a loop and `TryWrite`, and
+`TrimmedOsApiTests` keeps those calls out. Test a new version on a trimmed publish of the OS
+(os.kazo.ca), not only with `dotnet run`, which keeps the whole framework.
