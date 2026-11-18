@@ -2,6 +2,11 @@
   "appId": "ca.kazo.ai",
   "versions": [
     {
+      "version": "0.1.4-beta.1",
+      "path": "0.1.4-beta.1/ca.kazo.ai-0.1.4-beta.1.kazoapp",
+      "sha256": "7e4c28c2dd4df82b3e94d17b33550eec707cc2b6cf4cdc2178cbfe0bf4bb930a"
+    },
+    {
       "version": "0.1.3",
       "path": "0.1.3/ca.kazo.ai-0.1.3.kazoapp",
       "sha256": "18c028ee62cdccb69af1a1c4e4f039bccb475a0344b9cc1865dc8b188d0c75bb"
